@@ -2,11 +2,21 @@ const { URL } = require('url');
 const http = require('http');
 const https = require('https');
 
-const baseOptions = {
+module.exports.serializeCookies = serializeCookies;
+module.exports.getSetCookies = getSetCookies;
+module.exports.dispatchRequest = dispatchRequest;
+module.exports.delayTime = delayTime;
 
-};
 
-module.exports.getSetCookies = function (setCookieArray) {
+function delayTime(ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), ms);
+  });
+}
+
+function getSetCookies (setCookieArray) {
+  if (!setCookieArray) return {};
+
   const cookies = setCookieArray.reduce((accu, c) => {
     const mats = c.match(/^(.*?)=(.*?);/);
     accu[mats[1]] = mats[2];
@@ -16,7 +26,7 @@ module.exports.getSetCookies = function (setCookieArray) {
   return cookies;
 }
 
-module.exports.serializeCookies = function (cookies) {
+function serializeCookies (cookies) {
   return Object.keys(cookies).map(k => `${k}=${cookies[k]}`).join('; ');
 }
 
@@ -49,17 +59,19 @@ function mergeRequestOptionObject (...options) {
 }
 
 function dispatchRequest(config) {
-  const { url, cookies, ...misc } = config;
+  const { url, cookies, payload, ...misc } = config;
   const options = mergeRequestOptionObject(
     defaultOptions,
     constructRequestOptionFromUrl(url),
-    { headers: { Cookie: serializeCookies(cookies) } }
+    { headers: cookies ? { Cookie: serializeCookies(cookies) } : {} },
+    misc,
   );
 
   const protocol = options.protocol;
   const isHttps = protocol.startsWith('https');
   const transport = isHttps ? https : http;
 
+  // console.log(options);
   return new Promise((resolve, reject) => {
     var req = transport.request(options, function (res) {
       var chunks = [];
@@ -70,13 +82,18 @@ function dispatchRequest(config) {
 
       res.on('end', function () {
         var body = Buffer.concat(chunks);
-        resolve({ resp: res, body: body.toString() });
+        const setCookies = getSetCookies(res.headers['set-cookie']);
+        resolve({ resp: res, payload: body.toString(), setCookies, headers: res.headers });
       });
 
       res.on('error', function (e) {
         reject(e);
       });
     });
+
+    if (payload) {
+      req.write(payload);
+    }
 
     req.end();
   });
