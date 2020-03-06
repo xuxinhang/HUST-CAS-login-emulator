@@ -1,6 +1,6 @@
 const fs = require('fs');
 const qs = require('querystring');
-const { dispatchRequest, delayTime, getSetCookies, serializeCookies } = require('./utils');
+const { dispatchRequest, delayTime } = require('./utils');
 const { strEnc } = require('./crypto');
 
 // Read username and password from this external file.
@@ -31,7 +31,7 @@ async function run({ username, password }) {
   console.log(ticketRedirectTarget);
 
   if ((!ticketRedirectTarget) || ticketRedirectTarget.indexOf('pass.hust') >= 0) {
-    console.error('fail to login.');
+    console.error('Fail to login.');
     return;
   }
 
