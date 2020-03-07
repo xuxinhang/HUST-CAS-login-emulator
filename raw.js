@@ -1,19 +1,12 @@
-const fs = require('fs');
 const qs = require('querystring');
-const { dispatchRequest, delayTime } = require('./utils');
+const { dispatchRequest } = require('./utils');
 const { strEnc } = require('./crypto');
 
-// Read username and password from this external file.
-const externConfig = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
-
-run({
-  ...externConfig,
-});
+module.exports.emulateLogin = emulateLogin;
 
 
-async function run({ username, password, serviceTarget }) {
-  // const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=${encodeURIComponent(serviceTarget)}`;
-  const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html`;
+async function emulateLogin({ username, password, serviceURL }) {
+  const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=${encodeURIComponent(serviceURL)}`;
   const loginPageParams = await fetchLoginPage(loginPageURL);
   // await delayTime(100);
 
@@ -24,26 +17,22 @@ async function run({ username, password, serviceTarget }) {
     execution: loginPageParams.execution,
     cookie_jsessionid: loginPageParams.cookie_jsessionid,
     cookie_BIGip: loginPageParams.cookie_BIGip,
+    // rsa: '9AB8DB7...', ul: '11', pl: '22',
     ...calculateLoginField(username, password, loginPageParams.lt),
-    // rsa: '9AB8DB7...',
-    // ul: '10',
-    // pl: '12',
   });
 
-  console.log(ticketRedirectTarget);
-
   if ((!ticketRedirectTarget) || ticketRedirectTarget.indexOf('pass.hust') >= 0) {
-    console.error('Fail to login.');
-    return;
+    console.error('An unexpected redirect URL is returned.');
+    throw 'An unexpected redirect URL is returned.';
   }
+
+  console.info(`Redirecting to "${ticketRedirectTarget}" ...`);
 
   const { cookies: ticketCookies } = await redirectToTarget(ticketRedirectTarget);
 
-  const targetURL = 'http://ecard.m.hust.edu.cn/wechat-web/QueryController/select.html;jsessionid=24E9167CF245E7AF5238FD4B4C5DE06F?jsoncallback=call&account=222225&curpage=1&dateStatus=2020-01-01&typeStatus=1&_=1583209226870';
-  const { payload: body } = await dispatchRequest({ url: targetURL, cookies: ticketCookies });
-
-  console.log(body);
+  return { serviceAuthCookies: ticketCookies };
 }
+
 
 function calculateLoginField(username, password, ltCode) {
   return {
@@ -80,7 +69,6 @@ async function requestLogin(fields) {
   const { headers: responseHeaders } = await dispatchRequest({
     method: 'POST',
     url: formAction,
-    // url: 'https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html',
     cookies: {
       cas_hash: '',
       Language: 'zh_CN',
@@ -100,13 +88,10 @@ async function requestLogin(fields) {
     }),
   });
 
-  console.log(responseHeaders);
-
   return {
     location: responseHeaders.location,
   };
 }
-
 
 async function redirectToTarget(location) {
   const { headers, setCookies } = await dispatchRequest({
