@@ -11,13 +11,15 @@ run({
 });
 
 
-async function run({ username, password }) {
-  const loginPageParams = await fetchLoginPage();
-  await delayTime(100);
+async function run({ username, password, serviceTarget }) {
+  // const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=${encodeURIComponent(serviceTarget)}`;
+  const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html`;
+  const loginPageParams = await fetchLoginPage(loginPageURL);
+  // await delayTime(100);
 
   const { location: ticketRedirectTarget } = await requestLogin({
     lt: loginPageParams.lt,
-    formAction: loginPageParams.formAction,
+    formAction: 'https://pass.hust.edu.cn' + loginPageParams.formAction,
     _eventId: loginPageParams._eventId,
     execution: loginPageParams.execution,
     cookie_jsessionid: loginPageParams.cookie_jsessionid,
@@ -51,10 +53,10 @@ function calculateLoginField(username, password, ltCode) {
   };
 }
 
-async function fetchLoginPage() {
+async function fetchLoginPage(pageURL) {
   const { payload: pageContent, setCookies: cookies } = await dispatchRequest({
-    url: 'https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html',
-    'method': 'GET',
+    url: pageURL,
+    method: 'GET',
   });
 
   const params = {
@@ -77,7 +79,8 @@ async function requestLogin(fields) {
 
   const { headers: responseHeaders } = await dispatchRequest({
     method: 'POST',
-    url: 'https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html',
+    url: formAction,
+    // url: 'https://pass.hust.edu.cn/cas/login?service=http%3A%2F%2Fecard.m.hust.edu.cn%3A80%2Fwechat-web%2FQueryController%2FQueryurl.html',
     cookies: {
       cas_hash: '',
       Language: 'zh_CN',
