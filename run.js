@@ -1,11 +1,20 @@
 const fs = require('fs');
-const { emulateLogin } = require('./raw.js');
-const { dispatchRequest } = require('./utils.js');
+const path = require('path');
+const SRC_BASENAME = './src';
+const { emulateLogin } = require(path.resolve(SRC_BASENAME, 'raw.js'));
+const { dispatchRequest } = require(path.resolve(SRC_BASENAME, 'utils.js'));
 
+/**
+ * An example of using relative functions
+ */
+
+const EXTERN_CONFIG_FILE_PATH = './__config.json';
 
 (async function () {
-  // Read username and password from this external file.
-  const externConfig = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
+  // Try to read username and password from this external file.
+  const externConfig = fs.existsSync(EXTERN_CONFIG_FILE_PATH)
+    ? JSON.parse(fs.readFileSync(EXTERN_CONFIG_FILE_PATH, 'utf-8'))
+    : { username: 'M201906327', password: 'null' };
 
   // The service URL is included in the login page URL of HUST Authentication System
   // Please analyse the login page URL carefully to get the correct service URL, for example

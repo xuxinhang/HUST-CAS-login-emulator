@@ -1,4 +1,4 @@
-const { dispatchRequest } = require('./utils');
+const { dispatchRequest } = require('../src/utils');
 
 (async function () {
   const { resp, data } = await dispatchRequest({
