@@ -2,4 +2,7 @@ node_modules
 yarn.lock
 __*
 __*/*
+
 .vscode
+*.swp
+

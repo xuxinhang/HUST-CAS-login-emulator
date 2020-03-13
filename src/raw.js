@@ -7,9 +7,12 @@ module.exports.emulateLogin = emulateLogin;
 
 async function emulateLogin({ username, password, serviceURL }) {
   const loginPageURL = `https://pass.hust.edu.cn/cas/login?service=${encodeURIComponent(serviceURL)}`;
+
+  console.info('Fetching the login page.');
   const loginPageParams = await fetchLoginPage(loginPageURL);
   // await delayTime(100);
 
+  console.info('Submitting the login form.');
   const { location: ticketRedirectTarget } = await requestLogin({
     lt: loginPageParams.lt,
     formAction: 'https://pass.hust.edu.cn' + loginPageParams.formAction,

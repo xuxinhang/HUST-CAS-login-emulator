@@ -85,10 +85,10 @@ function dispatchRequest(config) {
         const setCookies = getSetCookies(res.headers['set-cookie']);
         resolve({ resp: res, payload: body.toString(), setCookies, headers: res.headers });
       });
+    });
 
-      res.on('error', function (e) {
-        reject(e);
-      });
+    req.on('error', function (e) {
+      reject(e);
     });
 
     if (payload) {
