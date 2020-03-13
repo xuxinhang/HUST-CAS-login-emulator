@@ -3,6 +3,7 @@ const { dispatchRequest } = require('./utils');
 const { strEnc } = require('./crypto');
 
 module.exports.emulateLogin = emulateLogin;
+module.exports.dispatchRequest = dispatchRequest; // export this helpful utility function
 
 
 async function emulateLogin({ username, password, serviceURL }) {

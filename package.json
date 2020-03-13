@@ -1,8 +1,8 @@
 {
-  "name": "fetch-ecard",
+  "name": "HUST-CAS-login-emulator",
   "version": "1.0.0",
-  "main": "run.js",
-  "license": "MIT",
+  "main": "index.js",
+  "license": "LGPL 2.0",
   "dependencies": {
   }
 }
