@@ -1,8 +1,5 @@
 const fs = require('fs');
-const path = require('path');
-const SRC_BASENAME = './src';
-const { emulateLogin } = require(path.resolve(SRC_BASENAME, 'raw.js'));
-const { dispatchRequest } = require(path.resolve(SRC_BASENAME, 'utils.js'));
+const { emulateLogin, dispatchRequest } = require('.');
 
 /**
  * An example of using relative functions

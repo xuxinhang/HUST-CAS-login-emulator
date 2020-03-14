@@ -1,8 +1,8 @@
 {
-  "name": "HUST-CAS-login-emulator",
+  "name": "hust-cas-login-emulator",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "LGPL 2.0",
+  "license": "GNU LGPLv3",
   "dependencies": {
   }
 }
