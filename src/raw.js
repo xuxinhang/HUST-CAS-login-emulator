@@ -1,6 +1,7 @@
 const qs = require('querystring');
 const { dispatchRequest } = require('./utils');
 const { strEnc } = require('./crypto');
+// const { strEnc } = require('./crypto.native'); // How about having a try?
 
 module.exports.emulateLogin = emulateLogin;
 module.exports.dispatchRequest = dispatchRequest; // export this helpful utility function

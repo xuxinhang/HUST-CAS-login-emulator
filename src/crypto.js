@@ -1,4 +1,11 @@
 module.exports.strEnc = strEnc;
+module.exports.enc = enc;
+
+/**
+ * [NOTICE]
+ * There is a problem in this so-called triple DES, whose result differs
+ * from that of OpenSSL. Please refer to other comments for more information.
+ */
 
 /**
 * DES加密解密
@@ -782,6 +789,21 @@ function strEnc(data,firstKey,secondKey,thirdKey){
       key[i*8+j]=keyByte[8*k+i];
     }
   }
+
+  /**
+   * [NOTICE] Uncomment the following code to fix the difference with
+   * the correct DES algorithm.
+   */
+
+  // var ipTable = [
+  //   57,49,41,33,25,17,9,1,58,50,42,34,26,18,
+  //   10,2,59,51,43,35,27,19,11,3,60,52,44,36,
+  //   63,55,47,39,31,23,15,7,62,54,46,38,30,22,
+  //   14,6,61,53,45,37,29,21,13,5,28,20,12,4,
+  // ];
+  // for (i = 0; i < 56; i++) {
+  //   key[i] = keyByte[ipTable[i] - 1];
+  // }
 
   var i = 0;
   for(i = 0;i < 16;i ++){
