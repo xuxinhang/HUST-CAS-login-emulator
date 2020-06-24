@@ -31,8 +31,6 @@ async function recognizeCaptcha (buffer) {
   ops.divseq(averagedImage, thresholdedFrames.length);
   const thresholdedImage = threshold_image(get_otsu_threshold(averagedImage), averagedImage, 1);
 
-  // console.log(averagedImage)
-
   const [ imageWidth, imageHeight ] = thresholdedImage.shape;
   const dw = ~~(imageWidth / 4);
   const splittedImages = [0, 1, 2, 3].map(i => thresholdedImage.hi(dw * i + dw, null).lo(dw * i, null));
@@ -47,13 +45,9 @@ async function recognizeCaptcha (buffer) {
   };
 
   const recognizedImageChars = splittedImages.map(img => {
-    // console.log(ops.sum(img));
     const distances = charTmplData.map(tmpl => {
-      // console.log(tmpl);
-      // console.log(ops.sum(tmpl.ndarray));
       return hamming(img.transpose(1, 0), tmpl.ndarray);
     });
-    // console.log(distances);
     const minDistValue = Math.min(...distances);
     const minDistIndex = distances.indexOf(minDistValue);
     return charTmplData[minDistIndex].char;
@@ -66,7 +60,6 @@ async function recognizeCaptcha (buffer) {
 //   const arrayShape = a.shape;
 //   const arraySize = arrayShape.reduce((a, b) => a * b);
 //   const dest = ndarray(new Int16Array(arraySize), arrayShape);
-
 //   ops.sub(dest, a, b);
 //   ops.abseq(dest);
 //   ops.divseq(dest, q);

@@ -6,6 +6,7 @@ const recognizeCaptcha = require('./captcha');
 
 module.exports.emulateLogin = emulateLogin;
 module.exports.dispatchRequest = dispatchRequest; // export this helpful utility function
+module.exports.recognizeCaptcha = recognizeCaptcha;
 
 
 async function emulateLogin({ username, password, serviceURL }) {
@@ -20,10 +21,9 @@ async function emulateLogin({ username, password, serviceURL }) {
     cookie_jsessionid: loginPageParams.cookie_jsessionid,
     cookie_BIGip: loginPageParams.cookie_BIGip,
   });
-  console.log(captchaImageBuf);
   const captchaChars = await recognizeCaptcha(captchaImageBuf);
-  console.log(captchaChars);
   const captchaString = captchaChars.join('');
+  console.info('Recognized CAPTCHA string: ', captchaString);
 
 
   console.info('Submitting the login form.');

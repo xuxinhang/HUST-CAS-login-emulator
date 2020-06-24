@@ -38,7 +38,6 @@ async function readNdarrayFromNpyFile (path) {
 module.exports = async function () {
   const dataList = await Promise.all(charList.map(item => {
     const filepath = path.join(__dirname, item.filename)
-    // console.log(filepath);
     return readNdarrayFromNpyFile(filepath)
       .then(ndarray => ({ char: item.char, ndarray }));
   }));
