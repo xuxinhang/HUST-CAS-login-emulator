@@ -4,5 +4,10 @@
   "main": "index.js",
   "license": "GNU LGPLv3",
   "dependencies": {
+    "get-pixels": "^3.3.2",
+    "ndarray": "^1.0.19",
+    "ndarray-ops": "^1.2.2",
+    "ndarray-scratch": "^1.2.0",
+    "npyjs": "^0.1.3"
   }
 }

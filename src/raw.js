@@ -2,6 +2,7 @@ const qs = require('querystring');
 const { dispatchRequest } = require('./utils');
 const { strEnc } = require('./crypto');
 // const { strEnc } = require('./crypto.native'); // How about having a try?
+const recognizeCaptcha = require('./captcha');
 
 module.exports.emulateLogin = emulateLogin;
 module.exports.dispatchRequest = dispatchRequest; // export this helpful utility function
@@ -14,6 +15,17 @@ async function emulateLogin({ username, password, serviceURL }) {
   const loginPageParams = await fetchLoginPage(loginPageURL);
   // await delayTime(100);
 
+
+  const captchaImageBuf = await fetchCaptchaImage({
+    cookie_jsessionid: loginPageParams.cookie_jsessionid,
+    cookie_BIGip: loginPageParams.cookie_BIGip,
+  });
+  console.log(captchaImageBuf);
+  const captchaChars = await recognizeCaptcha(captchaImageBuf);
+  console.log(captchaChars);
+  const captchaString = captchaChars.join('');
+
+
   console.info('Submitting the login form.');
   const { location: ticketRedirectTarget } = await requestLogin({
     lt: loginPageParams.lt,
@@ -22,6 +34,7 @@ async function emulateLogin({ username, password, serviceURL }) {
     execution: loginPageParams.execution,
     cookie_jsessionid: loginPageParams.cookie_jsessionid,
     cookie_BIGip: loginPageParams.cookie_BIGip,
+    code: captchaString,
     // rsa: '9AB8DB7...', ul: '11', pl: '22',
     ...calculateLoginField(username, password, loginPageParams.lt),
   });
@@ -67,9 +80,26 @@ async function fetchLoginPage(pageURL) {
   return params;
 }
 
+async function fetchCaptchaImage (fields) {
+  const imageURL = 'https://pass.hust.edu.cn/cas/code';
+  const { payload: imageDataBuf } = await dispatchRequest({
+    method: 'GET',
+    url: imageURL,
+    cookies:{
+      cas_hash: '',
+      Language: 'zh_CN',
+      JSESSIONID: fields.cookie_jsessionid,
+      'BIGipServerpool-icdc-cas2': fields.cookie_BIGip,
+    },
+    payloadParser: x => x,
+  });
+
+  return imageDataBuf;
+}
+
 
 async function requestLogin(fields) {
-  const { rsa, ul, pl, formAction, lt, execution, _eventId, cookie_jsessionid, cookie_BIGip } = fields;
+  const { code, rsa, ul, pl, formAction, lt, execution, _eventId, cookie_jsessionid, cookie_BIGip } = fields;
 
   const { headers: responseHeaders } = await dispatchRequest({
     method: 'POST',
@@ -84,6 +114,7 @@ async function requestLogin(fields) {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     payload: qs.stringify({
+      code: code,
       rsa: rsa,
       ul: ul,
       pl: pl,

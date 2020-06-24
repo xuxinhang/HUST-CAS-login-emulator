@@ -59,7 +59,7 @@ function mergeRequestOptionObject (...options) {
 }
 
 function dispatchRequest(config) {
-  const { url, cookies, payload, ...misc } = config;
+  const { url, cookies, payload, payloadParser = String, ...misc } = config;
   const options = mergeRequestOptionObject(
     defaultOptions,
     constructRequestOptionFromUrl(url),
@@ -83,7 +83,7 @@ function dispatchRequest(config) {
       res.on('end', function () {
         var body = Buffer.concat(chunks);
         const setCookies = getSetCookies(res.headers['set-cookie']);
-        resolve({ resp: res, payload: body.toString(), setCookies, headers: res.headers });
+        resolve({ resp: res, payload: payloadParser(body), setCookies, headers: res.headers });
       });
     });
 
